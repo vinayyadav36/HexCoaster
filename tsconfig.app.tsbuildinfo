@@ -1,0 +1,1 @@
+{"root":["./src/App.tsx","./src/main.tsx","./src/components/CoasterDesigner.tsx","./src/components/OrderForm.tsx","./src/lib/db.ts","./src/pages/Admin.tsx","./src/pages/Home.tsx"],"version":"5.9.3"}
