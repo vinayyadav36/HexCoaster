@@ -1,15 +1,27 @@
 import { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { CoasterDesigner } from '../components/CoasterDesigner';
 import { OrderForm } from '../components/OrderForm';
 import { Design, getDesigns } from '../lib/db';
+import { DesignPreview } from '../components/DesignPreview';
 
 export function Home() {
   const [designs, setDesigns] = useState<Design[]>([]);
   const [selectedDesign, setSelectedDesign] = useState<Design | null>(null);
+  const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     loadDesigns();
   }, []);
+
+  useEffect(() => {
+    if (location.state?.orderDesign) {
+      setSelectedDesign(location.state.orderDesign);
+      // Clear state so it doesn't persist on refresh
+      navigate('.', { replace: true, state: { ...location.state, orderDesign: undefined } });
+    }
+  }, [location.state, navigate]);
 
   const loadDesigns = async () => {
     const loaded = await getDesigns();
@@ -24,7 +36,7 @@ export function Home() {
   return (
     <div className="grid lg:grid-cols-2 gap-8">
       <div>
-        <CoasterDesigner onDesignSaved={handleDesignSaved} />
+        <CoasterDesigner onDesignSaved={handleDesignSaved} initialDesign={location.state?.editDesign} />
       </div>
 
       <div className="space-y-8">
@@ -32,20 +44,9 @@ export function Home() {
           <div className="bg-white p-6 rounded-lg shadow-sm border border-neutral-200">
             <h2 className="text-xl font-bold mb-4">Order Intent: {selectedDesign.name}</h2>
             <div className="mb-4 flex justify-center">
-               <div
-                  className="grid gap-0.5 bg-neutral-200 p-1 rounded"
-                  style={{ gridTemplateColumns: `repeat(${selectedDesign.layout}, minmax(0, 1fr))` }}
-                >
-                  {selectedDesign.colors.map((color, idx) => (
-                    <div
-                      key={idx}
-                      className="w-12 h-12"
-                      style={{ backgroundColor: color }}
-                    />
-                  ))}
-                </div>
+               <DesignPreview design={selectedDesign} className="w-32 h-32" />
             </div>
-            <OrderForm designId={selectedDesign.id} onSuccess={() => setSelectedDesign(null)} />
+            <OrderForm designId={selectedDesign.id} designName={selectedDesign.name} onSuccess={() => setSelectedDesign(null)} />
           </div>
         ) : (
           <div className="bg-white p-6 rounded-lg shadow-sm border border-neutral-200 text-center text-neutral-500">
@@ -60,22 +61,13 @@ export function Home() {
               {designs.map(d => (
                 <div
                   key={d.id}
-                  className="cursor-pointer border border-neutral-200 rounded p-2 hover:border-blue-500 transition-colors"
+                  className="cursor-pointer border border-neutral-200 rounded p-2 hover:border-blue-500 transition-colors flex flex-col"
                   onClick={() => setSelectedDesign(d)}
                 >
-                  <div
-                    className="grid gap-0.5 bg-neutral-100 p-1 rounded aspect-square mb-2"
-                    style={{ gridTemplateColumns: `repeat(${d.layout}, minmax(0, 1fr))` }}
-                  >
-                    {d.colors.map((color, idx) => (
-                      <div
-                        key={idx}
-                        className="w-full h-full"
-                        style={{ backgroundColor: color }}
-                      />
-                    ))}
+                  <div className="mb-2">
+                    <DesignPreview design={d} />
                   </div>
-                  <p className="text-sm text-center font-medium truncate">{d.name}</p>
+                  <p className="text-sm text-center font-medium truncate mt-auto">{d.name}</p>
                 </div>
               ))}
             </div>

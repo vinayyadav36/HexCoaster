@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Design, getDesigns, deleteDesign } from '../lib/db';
 import { useNavigate } from 'react-router-dom';
+import { DesignPreview } from '../components/DesignPreview';
 
 export function Gallery() {
   const [designs, setDesigns] = useState<Design[]>([]);
@@ -33,61 +34,6 @@ export function Gallery() {
     navigate('/', { state: { orderDesign: design } });
   };
 
-  const renderMiniPreview = (d: Design) => {
-    if (d.layoutType === 'hexagonal') {
-      return (
-        <div className="flex flex-wrap justify-center gap-px bg-neutral-100 p-1 rounded aspect-square overflow-hidden items-center">
-          {d.colors.map((color, idx) => (
-             <div key={idx} className="w-1/3 h-1/3" style={{
-               clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)',
-               backgroundColor: color,
-               margin: '-2px'
-             }} />
-          ))}
-        </div>
-      );
-    }
-    if (d.layoutType === 'circular') {
-      return (
-         <div className="relative w-full h-full aspect-square flex items-center justify-center bg-neutral-100 rounded">
-           {d.colors.map((color, idx) => {
-             const size = 100 - (idx * (100 / d.colors.length));
-             if (size <= 0) return null;
-             return (
-               <div key={idx} className="absolute rounded-full"
-                 style={{
-                   width: `${size}%`, height: `${size}%`, backgroundColor: color, zIndex: d.colors.length - idx
-                 }}
-               />
-             )
-           })}
-        </div>
-      );
-    }
-
-    const cols = Math.ceil(Math.sqrt(Number(d.layout) || d.colors.length));
-    return (
-      <div
-        className={`grid gap-px bg-neutral-100 p-1 rounded aspect-square ${d.layoutType === 'checkerboard' ? 'bg-neutral-300' : ''}`}
-        style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
-      >
-        {d.colors.map((color, idx) => {
-          const row = Math.floor(idx / cols);
-          const col = idx % cols;
-          const isChecker = (row + col) % 2 === 0;
-          const finalColor = d.layoutType === 'checkerboard' && isChecker && color === '#ffffff' ? '#e5e5e5' : color;
-          return (
-            <div
-              key={idx}
-              className="w-full h-full"
-              style={{ backgroundColor: finalColor }}
-            />
-          )
-        })}
-      </div>
-    );
-  };
-
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center bg-white p-6 rounded-lg shadow-sm border border-neutral-200">
@@ -111,9 +57,9 @@ export function Gallery() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {designs.map(d => (
-            <div key={d.id} className="bg-white border border-neutral-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
+            <div key={d.id} className="bg-white border border-neutral-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow flex flex-col">
               <div className="mb-4">
-                {renderMiniPreview(d)}
+                <DesignPreview design={d} />
               </div>
               <h3 className="font-bold text-lg truncate mb-1" title={d.name}>{d.name}</h3>
               <p className="text-sm text-neutral-500 mb-4 flex justify-between">

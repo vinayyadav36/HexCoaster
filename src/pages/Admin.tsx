@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Design, OrderIntent, getDesigns, getOrders, seedTemplates } from '../lib/db';
+import { DesignPreview } from '../components/DesignPreview';
 
 export function Admin() {
   const [designs, setDesigns] = useState<Design[]>([]);
@@ -64,18 +65,7 @@ export function Admin() {
                     <div className="mt-4 pt-4 border-t border-neutral-100 flex items-center space-x-4">
                       {design ? (
                         <>
-                          <div
-                            className="grid gap-px bg-neutral-200 p-px rounded"
-                            style={{ gridTemplateColumns: `repeat(${design.layout}, minmax(0, 1fr))` }}
-                          >
-                            {design.colors.map((color, idx) => (
-                              <div
-                                key={idx}
-                                className="w-8 h-8"
-                                style={{ backgroundColor: color }}
-                              />
-                            ))}
-                          </div>
+                          <DesignPreview design={design} className="w-16 h-16" />
                           <span className="text-sm text-neutral-600">Design: {design.name}</span>
                         </>
                       ) : (
@@ -96,20 +86,11 @@ export function Admin() {
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
               {designs.map(d => (
-                <div key={d.id} className="border border-neutral-200 rounded p-2">
-                  <div
-                    className="grid gap-0.5 bg-neutral-100 p-1 rounded aspect-square mb-2"
-                    style={{ gridTemplateColumns: `repeat(${d.layout}, minmax(0, 1fr))` }}
-                  >
-                    {d.colors.map((color, idx) => (
-                      <div
-                        key={idx}
-                        className="w-full h-full"
-                        style={{ backgroundColor: color }}
-                      />
-                    ))}
+                <div key={d.id} className="border border-neutral-200 rounded p-2 flex flex-col">
+                  <div className="mb-2">
+                    <DesignPreview design={d} />
                   </div>
-                  <p className="text-sm text-center font-medium truncate" title={d.name}>{d.name}</p>
+                  <p className="text-sm text-center font-medium truncate mt-auto" title={d.name}>{d.name}</p>
                 </div>
               ))}
             </div>
